@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test -- --run
+
+      - name: Build & Zip (Chrome)
+        run: pnpm zip
+
+      - name: Build & Zip (Firefox)
+        run: pnpm zip:firefox
+
+      - name: Build & Zip (Edge)
+        run: pnpm zip:edge
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ github.event.release.tag_name }}"
+          for file in .output/tags-*-chrome.zip .output/tags-*-firefox.zip .output/tags-*-edge.zip .output/tags-*-sources.zip; do
+            if [ -f "$file" ]; then
+              gh release upload "$tag" "$file" --clobber
+            fi
+          done
