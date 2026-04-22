@@ -1,8 +1,8 @@
 <template>
   <div :style="{ width: '280px', padding: '16px', textAlign: 'center' }">
-    <h3 :style="{ marginBottom: '12px' }">Tags — Bookmark Manager</h3>
+    <h3 :style="{ marginBottom: '12px' }">{{ $t('popup.title') }}</h3>
     <a-button type="primary" block @click="openManager">
-      Open Manager
+      {{ $t('popup.openManager') }}
     </a-button>
   </div>
 </template>

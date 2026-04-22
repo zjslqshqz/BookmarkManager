@@ -1,9 +1,16 @@
 <template>
   <div :style="{ padding: '16px', display: 'flex', flexDirection: 'column', height: '100vh' }">
     <div :style="{ marginBottom: '16px' }">
-      <h3 :style="{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: 600 }">
-        Tags
-      </h3>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <h3 :style="{ margin: 0, fontSize: '18px', fontWeight: 600 }">
+          {{ $t('sidebar.title') }}
+        </h3>
+        <a-button type="text" size="small" @click="showSettings = true">
+          <template #icon>
+            <SettingOutlined />
+          </template>
+        </a-button>
+      </div>
       <ModeSwitcher />
     </div>
 
@@ -57,7 +64,7 @@
           >
             <div style="display: flex; align-items: center; gap: 8px;">
               <a-tag :color="group.category.color" :style="{ margin: 0 }">
-                {{ group.category.name }}
+                {{ $t(`category.${group.category.id}`, group.category.name) }}
               </a-tag>
               <span style="margin-left: auto;">
                 <a-badge
@@ -75,7 +82,7 @@
           :style="{ marginTop: '8px' }"
           @click="showTagEditor = true"
         >
-          Manage Categories
+          {{ $t('sidebar.manageCategories') }}
         </a-button>
         <TagEditor v-model:open="showTagEditor" />
       </template>
@@ -107,26 +114,30 @@
 
     <div :style="{ borderTop: '1px solid #f0f0f0', paddingTop: '12px', marginTop: '12px', display: 'flex', justifyContent: bookmarksStore.duplicateCount > 0 ? 'space-between' : 'center', alignItems: 'center' }">
       <a-statistic
-        title="Total Bookmarks"
+        :title="$t('sidebar.totalBookmarks')"
         :value="bookmarksStore.totalCount"
       />
       <a-statistic
         v-if="bookmarksStore.duplicateCount > 0"
-        title="Duplicates"
+        :title="$t('sidebar.duplicates')"
         :value="bookmarksStore.duplicateCount"
         :value-style="{ color: '#fa8c16', cursor: 'pointer' }"
         @click="router.push('/duplicates')"
       />
     </div>
+
+    <SettingsModal v-model:open="showSettings" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { SettingOutlined } from '@ant-design/icons-vue';
 import ModeSwitcher from './ModeSwitcher.vue';
 import SearchBar from './SearchBar.vue';
 import TagEditor from './TagEditor.vue';
+import SettingsModal from './SettingsModal.vue';
 import { useSettingsStore } from '../stores/settings';
 import { useBookmarksStore } from '../stores/bookmarks';
 import { useNavigationStore } from '../stores/navigation';
@@ -143,4 +154,5 @@ const { tagGroups } = useTagGroups();
 const { folderGroups } = useFolderGroups();
 
 const showTagEditor = ref(false);
+const showSettings = ref(false);
 </script>

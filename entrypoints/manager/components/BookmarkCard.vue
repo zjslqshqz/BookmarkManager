@@ -30,9 +30,9 @@
             {{ bookmark.title }}
           </a>
           <StatusBadge :status="urlStatus.status" />
-          <a-tooltip v-if="isDuplicate" :title="'Same URL as: ' + duplicateTitles">
+          <a-tooltip v-if="isDuplicate" :title="$t('bookmark.duplicateTooltip', { titles: duplicateTitles })">
             <a-tag color="orange" :style="{ margin: 0, fontSize: '11px', lineHeight: '18px' }">
-              Duplicate
+              {{ $t('bookmark.duplicate') }}
             </a-tag>
           </a-tooltip>
         </div>
@@ -51,7 +51,7 @@
             :style="{ margin: 0, fontSize: '11px', lineHeight: '18px' }"
             @close.prevent="handleRemoveTag(tag.id)"
           >
-            {{ tag.name }}
+            {{ $t(`category.${tag.id}`, tag.name) }}
           </a-tag>
           <a-popover trigger="click" placement="bottomLeft">
             <template #content>
@@ -65,7 +65,7 @@
                     :checked="isTagged(cat.id)"
                     @change="toggleTag(cat.id)"
                   >
-                    <a-tag :color="cat.color" :style="{ margin: 0 }">{{ cat.name }}</a-tag>
+                    <a-tag :color="cat.color" :style="{ margin: 0 }">{{ $t(`category.${cat.id}`, cat.name) }}</a-tag>
                   </a-checkbox>
                 </div>
               </div>
@@ -73,7 +73,7 @@
             <a-tag
               :style="{ margin: 0, cursor: 'pointer', borderStyle: 'dashed', fontSize: '11px', lineHeight: '18px' }"
             >
-              <PlusOutlined /> Tag
+              <PlusOutlined /> {{ $t('bookmark.tag') }}
             </a-tag>
           </a-popover>
         </div>
@@ -87,20 +87,20 @@
         <template #overlay>
           <a-menu>
             <a-menu-item key="open" @click="openBookmark">
-              Open
+              {{ $t('bookmark.open') }}
             </a-menu-item>
             <a-menu-item key="check" @click="$emit('check', bookmark.url)">
-              Check URL
+              {{ $t('bookmark.checkUrl') }}
             </a-menu-item>
             <a-menu-item key="copy" @click="copyUrl">
-              Copy URL
+              {{ $t('bookmark.copyUrl') }}
             </a-menu-item>
             <a-menu-item key="edit" @click="$emit('edit', bookmark)">
-              Edit
+              {{ $t('common.edit') }}
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item key="delete" danger @click="$emit('delete', bookmark.id)">
-              Delete
+              {{ $t('common.delete') }}
             </a-menu-item>
           </a-menu>
         </template>
@@ -111,6 +111,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { MoreOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import StatusBadge from './StatusBadge.vue';
 import { useUrlStatusStore } from '../stores/urlStatus';
@@ -121,6 +122,8 @@ import { extractDomain } from '../lib/domain-extractor';
 import { matchBookmarkToCategories } from '../lib/keyword-matcher';
 import type { BookmarkItem, TagCategory } from '../types';
 import { message } from 'ant-design-vue';
+
+const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
   bookmark: BookmarkItem;
@@ -179,7 +182,7 @@ function openBookmark() {
 
 async function copyUrl() {
   await navigator.clipboard.writeText(props.bookmark.url);
-  message.success('URL copied');
+  message.success(t('bookmark.urlCopied'));
 }
 
 // --- Tag management (only used when tagMode=true) ---

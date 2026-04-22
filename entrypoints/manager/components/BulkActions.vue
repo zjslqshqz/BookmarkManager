@@ -1,21 +1,21 @@
 <template>
   <a-space v-if="selectedIds.size > 0" :style="{ marginBottom: '16px' }">
-    <span>{{ selectedIds.size }} selected</span>
+    <span>{{ $t('bulk.selected', { count: selectedIds.size }) }}</span>
     <a-button size="small" @click="$emit('checkSelected')">
-      Check URLs
+      {{ $t('bulk.checkUrls') }}
     </a-button>
     <a-popconfirm
-      title="Delete selected bookmarks?"
-      ok-text="Delete"
+      :title="$t('bulk.deleteConfirm')"
+      :ok-text="$t('common.delete')"
       ok-type="danger"
       @confirm="$emit('deleteSelected')"
     >
       <a-button size="small" danger>
-        Delete
+        {{ $t('common.delete') }}
       </a-button>
     </a-popconfirm>
     <a-button size="small" @click="$emit('clearSelection')">
-      Clear
+      {{ $t('bulk.clear') }}
     </a-button>
   </a-space>
 </template>

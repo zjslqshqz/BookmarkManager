@@ -1,7 +1,7 @@
 <template>
   <a-input-search
     v-model:value="searchStore.searchQuery"
-    placeholder="Search bookmarks..."
+    :placeholder="$t('search.placeholder')"
     allow-clear
   />
 </template>

@@ -8,7 +8,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { UrlStatusType } from '../types';
+
+const { t } = useI18n();
 
 const props = withDefaults(defineProps<{
   status: UrlStatusType;
@@ -38,18 +41,18 @@ const badgeStatus = computed(() => {
 const statusText = computed(() => {
   switch (props.status) {
     case 'valid':
-      return 'Valid';
+      return t('status.valid');
     case 'redirect':
-      return 'Redirect';
+      return t('status.redirect');
     case 'broken':
-      return 'Broken';
+      return t('status.broken');
     case 'server-error':
-      return 'Server Error';
+      return t('status.serverError');
     case 'checking':
-      return 'Checking...';
+      return t('status.checking');
     case 'unchecked':
     default:
-      return 'Not Checked';
+      return t('status.notChecked');
   }
 });
 </script>

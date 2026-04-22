@@ -1,10 +1,10 @@
 <template>
   <div style="display: flex; flex-direction: column; height: 100%;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-shrink: 0;">
-      <h2 style="margin: 0;">Bookmarks by Tags</h2>
+      <h2 style="margin: 0;">{{ $t('tags.title') }}</h2>
       <a-space>
         <a-button @click="checkAllUrls">
-          Check All URLs
+          {{ $t('common.checkAllUrls') }}
         </a-button>
       </a-space>
     </div>
@@ -18,7 +18,7 @@
 
     <div style="flex: 1; overflow: auto;">
       <a-spin :spinning="bookmarksStore.loading">
-        <a-empty v-if="tagGroups.length === 0 && !bookmarksStore.loading" description="No bookmarks found" />
+        <a-empty v-if="tagGroups.length === 0 && !bookmarksStore.loading" :description="$t('common.noBookmarks')" />
         <a-collapse v-else v-model:activeKey="expandedKeys" :bordered="false">
           <BookmarkGroup
             v-for="group in tagGroups"
@@ -47,6 +47,7 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Modal } from 'ant-design-vue';
 import BookmarkGroup from '../components/BookmarkGroup.vue';
 import BulkActions from '../components/BulkActions.vue';
@@ -58,6 +59,7 @@ import { useTagGroups } from '../composables/useTagGroups';
 import { requestUrlCheck, requestSingleUrlCheck } from '../lib/messaging';
 import type { BookmarkItem, TagGroup } from '../types';
 
+const { t } = useI18n();
 const bookmarksStore = useBookmarksStore();
 const urlStatusStore = useUrlStatusStore();
 const navigationStore = useNavigationStore();
@@ -79,17 +81,14 @@ watch(() => navigationStore.focusTrigger, () => {
   const action = navigationStore.focusAction;
 
   if (action === 'close') {
-    // Toggle close: collapse all
     expandedKeys.value = [];
     return;
   }
 
   if (!key) return;
 
-  // Step 1: close all panels first
   expandedKeys.value = [];
 
-  // Step 2: wait for collapse animation to finish, then expand target and scroll
   setTimeout(() => {
     expandedKeys.value = [key];
     nextTick(() => {
@@ -111,9 +110,9 @@ function toggleSelect(id: string) {
 
 function handleDelete(id: string) {
   Modal.confirm({
-    title: 'Delete bookmark?',
-    content: 'This action cannot be undone.',
-    okText: 'Delete',
+    title: t('common.deleteConfirmTitle'),
+    content: t('common.deleteConfirmContent'),
+    okText: t('common.delete'),
     okType: 'danger',
     onOk: () => bookmarksStore.removeBookmark(id),
   });

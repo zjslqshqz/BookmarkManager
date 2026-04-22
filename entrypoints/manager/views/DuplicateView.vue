@@ -7,7 +7,7 @@
             <ArrowLeftOutlined />
           </template>
         </a-button>
-        <h2 style="margin: 0;">Duplicate Bookmarks</h2>
+        <h2 style="margin: 0;">{{ $t('duplicates.title') }}</h2>
         <a-tag color="orange">{{ duplicateBookmarks.length }}</a-tag>
       </div>
     </div>
@@ -23,7 +23,7 @@
       <a-spin :spinning="bookmarksStore.loading">
         <a-empty
           v-if="duplicateBookmarks.length === 0 && !bookmarksStore.loading"
-          description="No duplicate bookmarks"
+          :description="$t('duplicates.noBookmarks')"
         />
         <div v-else>
           <BookmarkCard
@@ -48,6 +48,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { Modal } from 'ant-design-vue';
 import { ArrowLeftOutlined } from '@ant-design/icons-vue';
@@ -58,6 +59,7 @@ import { useBookmarksStore } from '../stores/bookmarks';
 import { requestUrlCheck, requestSingleUrlCheck } from '../lib/messaging';
 import type { BookmarkItem } from '../types';
 
+const { t } = useI18n();
 const router = useRouter();
 const bookmarksStore = useBookmarksStore();
 
@@ -81,9 +83,9 @@ function toggleSelect(id: string) {
 
 function handleDelete(id: string) {
   Modal.confirm({
-    title: 'Delete bookmark?',
-    content: 'This action cannot be undone.',
-    okText: 'Delete',
+    title: t('common.deleteConfirmTitle'),
+    content: t('common.deleteConfirmContent'),
+    okText: t('common.delete'),
     okType: 'danger',
     onOk: () => bookmarksStore.removeBookmark(id),
   });

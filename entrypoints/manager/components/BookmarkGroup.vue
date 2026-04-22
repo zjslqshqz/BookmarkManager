@@ -21,7 +21,7 @@
         size="small"
         @click.stop="$emit('checkAll')"
       >
-        Check URLs
+        {{ $t('bulk.checkUrls') }}
       </a-button>
     </template>
     <BookmarkCard

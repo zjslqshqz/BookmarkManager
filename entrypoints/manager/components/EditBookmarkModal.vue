@@ -1,24 +1,24 @@
 <template>
   <a-modal
     :open="open"
-    title="Edit Bookmark"
+    :title="$t('editModal.title')"
     :confirm-loading="saving"
     @ok="handleOk"
     @cancel="$emit('update:open', false)"
   >
     <a-form layout="vertical" :style="{ marginTop: '16px' }">
-      <a-form-item label="Title">
+      <a-form-item :label="$t('editModal.titleLabel')">
         <a-input v-model:value="editTitle" />
       </a-form-item>
-      <a-form-item label="URL">
+      <a-form-item :label="$t('editModal.urlLabel')">
         <a-input v-model:value="editUrl" />
       </a-form-item>
-      <a-form-item label="Folder">
+      <a-form-item :label="$t('editModal.folderLabel')">
         <a-tree-select
           v-model:value="editParentId"
           :tree-data="folderTreeData"
           tree-default-expand-all
-          placeholder="Select folder"
+          :placeholder="$t('editModal.folderPlaceholder')"
           :style="{ width: '100%' }"
           :field-names="{ label: 'title', value: 'id', children: 'children' }"
         />
@@ -29,9 +29,12 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { message } from 'ant-design-vue';
 import { useBookmarksStore } from '../stores/bookmarks';
 import type { BookmarkItem, FolderTreeNode } from '../types';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   open: boolean;
@@ -84,10 +87,10 @@ async function handleOk() {
   saving.value = true;
   try {
     await bookmarksStore.updateBookmark(props.bookmark.id, changes);
-    message.success('Bookmark updated');
+    message.success(t('editModal.success'));
     emit('update:open', false);
   } catch (e) {
-    message.error(e instanceof Error ? e.message : 'Failed to update bookmark');
+    message.error(e instanceof Error ? e.message : t('editModal.error'));
   } finally {
     saving.value = false;
   }

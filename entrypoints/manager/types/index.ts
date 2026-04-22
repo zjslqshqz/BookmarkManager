@@ -50,6 +50,8 @@ export interface UrlStatus {
 
 export type ViewMode = 'domain' | 'tags' | 'folder';
 
+export type LocalePreference = 'auto' | 'en' | 'zh-CN';
+
 export interface MessageCheckUrls {
   type: 'CHECK_URLS';
   urls: string[];

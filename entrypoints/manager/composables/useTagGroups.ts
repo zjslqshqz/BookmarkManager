@@ -1,4 +1,5 @@
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useSearchStore } from '../stores/search';
 import { useUserTagsStore } from '../stores/userTags';
 import { useBookmarkTagsStore } from '../stores/bookmarkTags';
@@ -6,6 +7,7 @@ import { groupBookmarksByTags } from '../lib/keyword-matcher';
 import type { TagGroup } from '../types';
 
 export function useTagGroups() {
+  const { t } = useI18n();
   const searchStore = useSearchStore();
   const userTagsStore = useUserTagsStore();
   const bookmarkTagsStore = useBookmarkTagsStore();
@@ -25,7 +27,7 @@ export function useTagGroups() {
         results.push({
           category: {
             id: 'uncategorized',
-            name: 'Uncategorized',
+            name: t('category.uncategorized'),
             keywords: [],
             color: '#8c8c8c',
             icon: 'QuestionCircleOutlined',
