@@ -105,11 +105,17 @@
       </template>
     </div>
 
-    <div :style="{ borderTop: '1px solid #f0f0f0', paddingTop: '12px', marginTop: '12px' }">
+    <div :style="{ borderTop: '1px solid #f0f0f0', paddingTop: '12px', marginTop: '12px', display: 'flex', justifyContent: bookmarksStore.duplicateCount > 0 ? 'space-between' : 'center', alignItems: 'center' }">
       <a-statistic
         title="Total Bookmarks"
         :value="bookmarksStore.totalCount"
-        :style="{ textAlign: 'center' }"
+      />
+      <a-statistic
+        v-if="bookmarksStore.duplicateCount > 0"
+        title="Duplicates"
+        :value="bookmarksStore.duplicateCount"
+        :value-style="{ color: '#fa8c16', cursor: 'pointer' }"
+        @click="router.push('/duplicates')"
       />
     </div>
   </div>
@@ -117,6 +123,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import ModeSwitcher from './ModeSwitcher.vue';
 import SearchBar from './SearchBar.vue';
 import TagEditor from './TagEditor.vue';
@@ -127,6 +134,7 @@ import { useDomainGroups } from '../composables/useDomainGroups';
 import { useTagGroups } from '../composables/useTagGroups';
 import { useFolderGroups } from '../composables/useFolderGroups';
 
+const router = useRouter();
 const settingsStore = useSettingsStore();
 const bookmarksStore = useBookmarksStore();
 const navigationStore = useNavigationStore();

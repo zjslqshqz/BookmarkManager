@@ -1,12 +1,15 @@
 <template>
   <div style="display: flex; flex-direction: column; height: 100%;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-shrink: 0;">
-      <h2 style="margin: 0;">Bookmarks by Folder</h2>
-      <a-space>
-        <a-button @click="checkAllUrls">
-          Check All URLs
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a-button type="text" @click="goBack">
+          <template #icon>
+            <ArrowLeftOutlined />
+          </template>
         </a-button>
-      </a-space>
+        <h2 style="margin: 0;">Duplicate Bookmarks</h2>
+        <a-tag color="orange">{{ duplicateBookmarks.length }}</a-tag>
+      </div>
     </div>
 
     <BulkActions
@@ -18,24 +21,24 @@
 
     <div style="flex: 1; overflow: auto;">
       <a-spin :spinning="bookmarksStore.loading">
-        <a-empty v-if="folderGroups.length === 0 && !bookmarksStore.loading" description="No bookmarks found" />
-        <a-collapse v-else v-model:activeKey="expandedKeys" :bordered="false">
-          <BookmarkGroup
-            v-for="group in folderGroups"
-            :key="group.folderName"
-            :ref="(el: any) => setGroupRef(group.folderName, el)"
-            :group-key="group.folderName"
-            :title="group.folderName"
-            :bookmarks="group.bookmarks"
+        <a-empty
+          v-if="duplicateBookmarks.length === 0 && !bookmarksStore.loading"
+          description="No duplicate bookmarks"
+        />
+        <div v-else>
+          <BookmarkCard
+            v-for="bookmark in duplicateBookmarks"
+            :key="bookmark.id"
+            :bookmark="bookmark"
             :selectable="true"
-            :selected-ids="selectedIds"
+            :selected="selectedIds.has(bookmark.id)"
+            :show-folder="true"
             @select="toggleSelect"
             @delete="handleDelete"
             @check="handleCheckUrl"
             @edit="handleEdit"
-            @check-all="handleCheckGroup(group)"
           />
-        </a-collapse>
+        </div>
       </a-spin>
     </div>
 
@@ -44,57 +47,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { Modal } from 'ant-design-vue';
-import BookmarkGroup from '../components/BookmarkGroup.vue';
+import { ArrowLeftOutlined } from '@ant-design/icons-vue';
+import BookmarkCard from '../components/BookmarkCard.vue';
 import BulkActions from '../components/BulkActions.vue';
 import EditBookmarkModal from '../components/EditBookmarkModal.vue';
 import { useBookmarksStore } from '../stores/bookmarks';
-import { useUrlStatusStore } from '../stores/urlStatus';
-import { useNavigationStore } from '../stores/navigation';
-import { useFolderGroups } from '../composables/useFolderGroups';
 import { requestUrlCheck, requestSingleUrlCheck } from '../lib/messaging';
-import type { BookmarkItem, FolderGroup } from '../types';
+import type { BookmarkItem } from '../types';
 
+const router = useRouter();
 const bookmarksStore = useBookmarksStore();
-const urlStatusStore = useUrlStatusStore();
-const navigationStore = useNavigationStore();
-const { folderGroups } = useFolderGroups();
+
+const duplicateBookmarks = computed(() => bookmarksStore.duplicateBookmarks);
 
 const selectedIds = ref(new Set<string>());
-const expandedKeys = ref<string[]>([]);
 const showEditModal = ref(false);
 const editingBookmark = ref<BookmarkItem | null>(null);
 
-const groupRefs = new Map<string, any>();
-function setGroupRef(key: string, el: any) {
-  if (el) groupRefs.set(key, el);
-  else groupRefs.delete(key);
+function goBack() {
+  router.back();
 }
-
-watch(() => navigationStore.focusTrigger, () => {
-  const key = navigationStore.focusedGroupKey;
-  const action = navigationStore.focusAction;
-
-  if (action === 'close') {
-    expandedKeys.value = [];
-    return;
-  }
-
-  if (!key) return;
-
-  expandedKeys.value = [];
-
-  setTimeout(() => {
-    expandedKeys.value = [key];
-    nextTick(() => {
-      const el = groupRefs.get(key);
-      if (el?.$el) {
-        el.$el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-  }, 300);
-});
 
 function toggleSelect(id: string) {
   if (selectedIds.value.has(id)) {
@@ -121,16 +96,6 @@ async function handleCheckUrl(url: string) {
 function handleEdit(bookmark: BookmarkItem) {
   editingBookmark.value = bookmark;
   showEditModal.value = true;
-}
-
-async function handleCheckGroup(group: FolderGroup) {
-  const urls = group.bookmarks.map((b) => b.url);
-  await requestUrlCheck(urls);
-}
-
-async function checkAllUrls() {
-  const urls = bookmarksStore.bookmarks.map((b) => b.url);
-  await urlStatusStore.checkAll(urls);
 }
 
 async function checkSelected() {

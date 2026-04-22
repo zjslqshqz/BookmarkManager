@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import DomainView from '../views/DomainView.vue';
 import TagView from '../views/TagView.vue';
 import FolderView from '../views/FolderView.vue';
+import DuplicateView from '../views/DuplicateView.vue';
 
 const routes = [
   {
@@ -22,6 +23,11 @@ const routes = [
     path: '/folder',
     name: 'folder',
     component: FolderView,
+  },
+  {
+    path: '/duplicates',
+    name: 'duplicates',
+    component: DuplicateView,
   },
 ];
 

@@ -95,6 +95,9 @@
             <a-menu-item key="copy" @click="copyUrl">
               Copy URL
             </a-menu-item>
+            <a-menu-item key="edit" @click="$emit('edit', bookmark)">
+              Edit
+            </a-menu-item>
             <a-menu-divider />
             <a-menu-item key="delete" danger @click="$emit('delete', bookmark.id)">
               Delete
@@ -136,6 +139,7 @@ defineEmits<{
   select: [id: string];
   delete: [id: string];
   check: [url: string];
+  edit: [bookmark: BookmarkItem];
 }>();
 
 const urlStatusStore = useUrlStatusStore();
@@ -149,8 +153,8 @@ const isDuplicate = computed(() => bookmarksStore.duplicateIds.has(props.bookmar
 
 const duplicateTitles = computed(() => {
   if (!isDuplicate.value) return '';
-  return bookmarksStore.bookmarks
-    .filter(b => b.url === props.bookmark.url && b.id !== props.bookmark.id)
+  return bookmarksStore.duplicateBookmarks
+    .filter(b => b.url === props.bookmark.url && b.title === props.bookmark.title && b.id !== props.bookmark.id)
     .map(b => `"${b.title}" (${b.folderPath})`)
     .join(', ');
 });

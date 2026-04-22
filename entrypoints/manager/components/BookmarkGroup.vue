@@ -34,6 +34,7 @@
       @select="$emit('select', $event)"
       @delete="$emit('delete', $event)"
       @check="$emit('check', $event)"
+      @edit="$emit('edit', $event)"
     />
   </a-collapse-panel>
 </template>
@@ -63,6 +64,7 @@ defineEmits<{
   select: [id: string];
   delete: [id: string];
   check: [url: string];
+  edit: [bookmark: BookmarkItem];
   checkAll: [];
 }>();
 </script>

@@ -33,6 +33,12 @@ export interface FolderGroup {
   bookmarks: BookmarkItem[];
 }
 
+export interface FolderTreeNode {
+  id: string;
+  title: string;
+  children: FolderTreeNode[];
+}
+
 export type UrlStatusType = 'valid' | 'redirect' | 'broken' | 'server-error' | 'unchecked' | 'checking';
 
 export interface UrlStatus {

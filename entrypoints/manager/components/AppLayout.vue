@@ -8,7 +8,7 @@
       <AppSidebar />
     </a-layout-sider>
     <a-layout>
-      <a-layout-content :style="{ padding: '24px', background: '#f5f5f5', overflow: 'auto' }">
+      <a-layout-content :style="{ padding: '24px', background: '#f5f5f5', overflow: 'hidden' }">
         <router-view />
       </a-layout-content>
     </a-layout>

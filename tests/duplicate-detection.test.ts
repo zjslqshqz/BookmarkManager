@@ -41,60 +41,75 @@ describe('deduplicateBookmarks', () => {
     });
   });
 
-  describe('URL duplicate marking (same url, different titles)', () => {
-    it('should mark bookmarks with same URL but different titles', () => {
+  describe('exact duplicate ID tracking (same title + same url)', () => {
+    it('should track all IDs of exact duplicates', () => {
+      const bookmarks = [
+        makeBookmark('1', 'Google', 'https://google.com', 'Work'),
+        makeBookmark('2', 'Google', 'https://google.com', 'Personal'),
+        makeBookmark('3', 'GitHub', 'https://github.com'),
+      ];
+      const { exactDuplicateIds } = deduplicateBookmarks(bookmarks);
+      expect(exactDuplicateIds.size).toBe(2);
+      expect(exactDuplicateIds.has('1')).toBe(true);
+      expect(exactDuplicateIds.has('2')).toBe(true);
+      expect(exactDuplicateIds.has('3')).toBe(false);
+    });
+
+    it('should not mark bookmarks with same URL but different titles as duplicates', () => {
       const bookmarks = [
         makeBookmark('1', 'Google Search', 'https://google.com'),
         makeBookmark('2', 'Google Home', 'https://google.com'),
       ];
-      const { urlDuplicateIds } = deduplicateBookmarks(bookmarks);
-      expect(urlDuplicateIds.size).toBe(2);
-      expect(urlDuplicateIds.has('1')).toBe(true);
-      expect(urlDuplicateIds.has('2')).toBe(true);
+      const { exactDuplicateIds } = deduplicateBookmarks(bookmarks);
+      expect(exactDuplicateIds.size).toBe(0);
     });
 
-    it('should not mark unique URLs as duplicates', () => {
+    it('should not mark unique bookmarks as duplicates', () => {
       const bookmarks = [
         makeBookmark('1', 'Google', 'https://google.com'),
         makeBookmark('2', 'GitHub', 'https://github.com'),
       ];
-      const { urlDuplicateIds } = deduplicateBookmarks(bookmarks);
-      expect(urlDuplicateIds.size).toBe(0);
+      const { exactDuplicateIds } = deduplicateBookmarks(bookmarks);
+      expect(exactDuplicateIds.size).toBe(0);
     });
 
-    it('should not mark exact duplicates as url-duplicates (they are removed)', () => {
+    it('should track triple exact duplicates', () => {
       const bookmarks = [
-        makeBookmark('1', 'Google', 'https://google.com'),
-        makeBookmark('2', 'Google', 'https://google.com'),
+        makeBookmark('1', 'Google', 'https://google.com', 'A'),
+        makeBookmark('2', 'Google', 'https://google.com', 'B'),
+        makeBookmark('3', 'Google', 'https://google.com', 'C'),
       ];
-      const { bookmarks: result, urlDuplicateIds } = deduplicateBookmarks(bookmarks);
-      expect(result.length).toBe(1);
-      expect(urlDuplicateIds.size).toBe(0);
+      const { exactDuplicateIds } = deduplicateBookmarks(bookmarks);
+      expect(exactDuplicateIds.size).toBe(3);
+      expect(exactDuplicateIds.has('1')).toBe(true);
+      expect(exactDuplicateIds.has('2')).toBe(true);
+      expect(exactDuplicateIds.has('3')).toBe(true);
     });
   });
 
   describe('combined scenarios', () => {
-    it('should handle mix of exact dupes and url dupes', () => {
+    it('should handle mix of exact dupes and url-only dupes', () => {
       const bookmarks = [
         makeBookmark('1', 'Google', 'https://google.com'),
-        makeBookmark('2', 'Google', 'https://google.com'),       // exact dupe of 1 → removed
-        makeBookmark('3', 'Google Home', 'https://google.com'),   // url dupe of 1 → marked
+        makeBookmark('2', 'Google', 'https://google.com'),       // exact dupe of 1
+        makeBookmark('3', 'Google Home', 'https://google.com'),   // same url different title → NOT a duplicate
         makeBookmark('4', 'GitHub', 'https://github.com'),
         makeBookmark('5', 'MDN', 'https://developer.mozilla.org'),
       ];
-      const { bookmarks: result, urlDuplicateIds } = deduplicateBookmarks(bookmarks);
+      const { bookmarks: result, exactDuplicateIds } = deduplicateBookmarks(bookmarks);
       expect(result.length).toBe(4);
       expect(result.map(b => b.id)).toEqual(['1', '3', '4', '5']);
-      expect(urlDuplicateIds.size).toBe(2);
-      expect(urlDuplicateIds.has('1')).toBe(true);
-      expect(urlDuplicateIds.has('3')).toBe(true);
-      expect(urlDuplicateIds.has('4')).toBe(false);
+      // Only exact dupes (1 and 2) are marked, not url-only dupe (3)
+      expect(exactDuplicateIds.size).toBe(2);
+      expect(exactDuplicateIds.has('1')).toBe(true);
+      expect(exactDuplicateIds.has('2')).toBe(true);
+      expect(exactDuplicateIds.has('3')).toBe(false);
     });
 
     it('should return empty results for empty input', () => {
-      const { bookmarks: result, urlDuplicateIds } = deduplicateBookmarks([]);
+      const { bookmarks: result, exactDuplicateIds } = deduplicateBookmarks([]);
       expect(result.length).toBe(0);
-      expect(urlDuplicateIds.size).toBe(0);
+      expect(exactDuplicateIds.size).toBe(0);
     });
 
     it('should handle all unique bookmarks', () => {
@@ -103,9 +118,9 @@ describe('deduplicateBookmarks', () => {
         makeBookmark('2', 'GitHub', 'https://github.com'),
         makeBookmark('3', 'MDN', 'https://developer.mozilla.org'),
       ];
-      const { bookmarks: result, urlDuplicateIds } = deduplicateBookmarks(bookmarks);
+      const { bookmarks: result, exactDuplicateIds } = deduplicateBookmarks(bookmarks);
       expect(result.length).toBe(3);
-      expect(urlDuplicateIds.size).toBe(0);
+      expect(exactDuplicateIds.size).toBe(0);
     });
   });
 });

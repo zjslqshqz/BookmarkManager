@@ -3,42 +3,43 @@ import type { BookmarkItem } from '../types';
 export interface DeduplicateResult {
   /** Deduplicated bookmarks (exact title+url duplicates removed, keeping first) */
   bookmarks: BookmarkItem[];
-  /** IDs of bookmarks that share URL with another but have different titles */
-  urlDuplicateIds: Set<string>;
+  /** IDs of ALL bookmarks whose title+url combination appears more than once */
+  exactDuplicateIds: Set<string>;
 }
 
 export function deduplicateBookmarks(bookmarks: BookmarkItem[]): DeduplicateResult {
-  // Phase 1: Remove exact duplicates (same title + same url), keep first occurrence
-  const exactSeen = new Map<string, BookmarkItem>();
-  const deduped: BookmarkItem[] = [];
-
+  // Count occurrences of each title+url combination
+  const keyToIds = new Map<string, string[]>();
   for (const b of bookmarks) {
-    const exactKey = `${b.title}\0${b.url}`;
-    if (!exactSeen.has(exactKey)) {
-      exactSeen.set(exactKey, b);
-      deduped.push(b);
-    }
-  }
-
-  // Phase 2: Among remaining, find URL-only duplicates (same url, different titles)
-  const urlMap = new Map<string, string[]>();
-  for (const b of deduped) {
-    const ids = urlMap.get(b.url);
+    const key = `${b.title}\0${b.url}`;
+    const ids = keyToIds.get(key);
     if (ids) {
       ids.push(b.id);
     } else {
-      urlMap.set(b.url, [b.id]);
+      keyToIds.set(key, [b.id]);
     }
   }
 
-  const urlDuplicateIds = new Set<string>();
-  for (const ids of urlMap.values()) {
+  // Collect IDs where the combination appears 2+ times
+  const exactDuplicateIds = new Set<string>();
+  for (const ids of keyToIds.values()) {
     if (ids.length > 1) {
       for (const id of ids) {
-        urlDuplicateIds.add(id);
+        exactDuplicateIds.add(id);
       }
     }
   }
 
-  return { bookmarks: deduped, urlDuplicateIds };
+  // Remove exact duplicates from main list, keeping first occurrence
+  const seen = new Set<string>();
+  const deduped: BookmarkItem[] = [];
+  for (const b of bookmarks) {
+    const key = `${b.title}\0${b.url}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      deduped.push(b);
+    }
+  }
+
+  return { bookmarks: deduped, exactDuplicateIds };
 }
