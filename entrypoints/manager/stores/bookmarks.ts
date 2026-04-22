@@ -4,7 +4,7 @@ import type { BookmarkItem, FolderTreeNode } from '../types';
 import { deduplicateBookmarks } from '../lib/duplicate-detector';
 
 function flattenBookmarkTree(
-  nodes: browser.Bookmarks.BookmarkTreeNode[],
+  nodes: Browser.bookmarks.BookmarkTreeNode[],
   folderPath = '',
 ): BookmarkItem[] {
   const results: BookmarkItem[] = [];
@@ -89,7 +89,7 @@ export const useBookmarksStore = defineStore('bookmarks', () => {
   }
 
   function buildFolderTree(
-    nodes: browser.Bookmarks.BookmarkTreeNode[],
+    nodes: Browser.bookmarks.BookmarkTreeNode[],
   ): FolderTreeNode[] {
     const result: FolderTreeNode[] = [];
     for (const node of nodes) {

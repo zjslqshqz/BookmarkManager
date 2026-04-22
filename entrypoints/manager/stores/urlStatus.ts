@@ -21,7 +21,7 @@ export const useUrlStatusStore = defineStore('urlStatus', () => {
     try {
       const cache = await browser.storage.local.get('urlStatusCache');
       if (cache.urlStatusCache) {
-        statuses.value = cache.urlStatusCache;
+        statuses.value = cache.urlStatusCache as Record<string, UrlStatus>;
       }
     } catch {
       // Ignore cache load errors
