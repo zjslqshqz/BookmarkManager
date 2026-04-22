@@ -116,4 +116,4 @@ pnpm typecheck
 
 ## License
 
-Private
+MIT
